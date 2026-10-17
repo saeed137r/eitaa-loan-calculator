@@ -3,289 +3,655 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>محاسبه‌گر اقساط وام</title>
+  <title>منبع وام و اعتبار</title>
   <script src="https://developer.eitaa.com/eitaa-web-app.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    :root {
+      --primary: #0d6efd;
+      --primary-dark: #0b5ed7;
+      --bg: #f4f6f9;
+      --card: #ffffff;
+      --text: #1a1a1a;
+      --muted: #6c757d;
+      --radius: 16px;
+      --shadow: 0 4px 20px rgba(0,0,0,0.06);
     }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      background: #f0f2f5;
-      color: #1a1a1a;
-      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
+      padding-bottom: 80px;
     }
 
-    .container {
-      max-width: 420px;
-      margin: 0 auto;
-    }
-
+    /* هدر */
     .header {
-      text-align: center;
-      margin-bottom: 24px;
-      padding-top: 8px;
+      background: var(--card);
+      padding: 16px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
     .header h1 {
-      font-size: 22px;
+      font-size: 18px;
       font-weight: 700;
-      color: #0d6efd;
+      flex: 1;
     }
 
-    .header p {
-      font-size: 14px;
-      color: #666;
-      margin-top: 4px;
+    .back-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: #f0f2f5;
+      font-size: 18px;
+      cursor: pointer;
+      display: none;
     }
 
+    /* محتوای صفحات */
+    .page {
+      display: none;
+      padding: 20px 16px;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .page.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* کارت‌ها */
     .card {
-      background: white;
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-      margin-bottom: 16px;
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: transform 0.15s;
     }
 
+    .card:active { transform: scale(0.98); }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+
+    .logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: #f0f4ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .card-subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .tag {
+      background: #eef3ff;
+      color: var(--primary);
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+
+    /* دکمه‌ها */
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:active {
+      background: var(--primary-dark);
+    }
+
+    /* صفحه جزئیات */
+    .detail-section {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .detail-section h3 {
+      font-size: 15px;
+      margin-bottom: 10px;
+      color: var(--primary);
+    }
+
+    .detail-section p, .detail-section li {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #333;
+    }
+
+    .detail-section ul {
+      padding-right: 18px;
+    }
+
+    /* نوار پایین */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--card);
+      display: flex;
+      border-top: 1px solid #eee;
+      z-index: 100;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .nav-item {
+      flex: 1;
+      text-align: center;
+      padding: 10px 0 8px;
+      font-size: 11px;
+      color: var(--muted);
+      cursor: pointer;
+      border: none;
+      background: none;
+    }
+
+    .nav-item.active {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .nav-item span {
+      display: block;
+      font-size: 20px;
+      margin-bottom: 2px;
+    }
+
+    /* فرم */
     .form-group {
       margin-bottom: 16px;
     }
 
-    label {
+    .form-group label {
       display: block;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 500;
       margin-bottom: 6px;
-      color: #333;
     }
 
-    input {
+    .form-group select,
+    .form-group input {
       width: 100%;
       padding: 12px 14px;
       border: 1.5px solid #e0e0e0;
       border-radius: 10px;
-      font-size: 16px;
+      font-size: 15px;
       outline: none;
-      transition: border-color 0.2s;
-      direction: ltr;
-      text-align: left;
-    }
-
-    input:focus {
-      border-color: #0d6efd;
-    }
-
-    .quick-rates {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 8px;
-    }
-
-    .rate-btn {
-      flex: 1;
-      min-width: 60px;
-      padding: 8px 0;
-      border: 1.5px solid #0d6efd;
       background: white;
-      color: #0d6efd;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
     }
 
-    .rate-btn.active {
-      background: #0d6efd;
-      color: white;
+    .form-group select:focus,
+    .form-group input:focus {
+      border-color: var(--primary);
     }
 
-    .calculate-btn {
-      width: 100%;
-      padding: 14px;
-      background: #0d6efd;
-      color: white;
-      border: none;
+    /* ماشین حساب کوچک */
+    .calc-result {
+      background: #f0f7ff;
       border-radius: 12px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 8px;
-    }
-
-    .calculate-btn:active {
-      background: #0b5ed7;
-    }
-
-    .result {
-      display: none;
-    }
-
-    .result.show {
-      display: block;
-    }
-
-    .result-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 0;
-      border-bottom: 1px solid #f0f0f0;
-    }
-
-    .result-item:last-child {
-      border-bottom: none;
-    }
-
-    .result-label {
-      font-size: 14px;
-      color: #555;
-    }
-
-    .result-value {
-      font-size: 16px;
-      font-weight: 700;
-      color: #0d6efd;
-    }
-
-    .result-value.big {
-      font-size: 20px;
-    }
-
-    .footer {
+      padding: 16px;
+      margin-top: 16px;
       text-align: center;
-      margin-top: 20px;
-      font-size: 12px;
-      color: #999;
     }
 
-    .close-btn {
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      background: rgba(0,0,0,0.05);
-      border: none;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      font-size: 18px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .calc-result .amount {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--primary);
     }
   </style>
 </head>
 <body>
-  <button class="close-btn" onclick="window.Eitaa?.WebApp?.close()">✕</button>
 
-  <div class="container">
-    <div class="header">
-      <h1>محاسبه‌گر اقساط وام</h1>
-      <p>محاسبه سریع قسط ماهانه و سود</p>
+  <!-- هدر -->
+  <div class="header">
+    <button class="back-btn" id="backBtn" onclick="goBack()">→</button>
+    <h1 id="pageTitle">منبع وام و اعتبار</h1>
+  </div>
+
+  <!-- ==================== صفحات ==================== -->
+
+  <!-- صفحه اصلی -->
+  <div class="page active" id="page-home">
+    <div id="homeContent"></div>
+  </div>
+
+  <!-- صفحه لیست یک دسته -->
+  <div class="page" id="page-category">
+    <div id="categoryContent"></div>
+  </div>
+
+  <!-- صفحه جزئیات یک آیتم -->
+  <div class="page" id="page-detail">
+    <div id="detailContent"></div>
+  </div>
+
+  <!-- صفحه پیشنهاد هوشمند -->
+  <div class="page" id="page-recommend">
+    <div class="detail-section">
+      <h3>پیشنهاد هوشمند برای شما</h3>
+      <p style="font-size:13px;color:#666;margin-bottom:16px">شرایط خود را وارد کنید تا بهترین گزینه‌ها را پیشنهاد دهیم.</p>
+
+      <div class="form-group">
+        <label>هدف شما چیست؟</label>
+        <select id="goal">
+          <option value="goods">خرید کالا</option>
+          <option value="marriage">وام ازدواج</option>
+          <option value="child">وام فرزندآوری</option>
+          <option value="other">سایر</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>مبلغ تقریبی مورد نیاز (تومان)</label>
+        <input type="number" id="neededAmount" placeholder="مثلاً 50000000">
+      </div>
+
+      <div class="form-group">
+        <label>حداکثر قسط ماهانه قابل پرداخت</label>
+        <input type="number" id="maxInstallment" placeholder="مثلاً 5000000">
+      </div>
+
+      <button class="btn btn-primary" onclick="showRecommendations()">دریافت پیشنهاد</button>
     </div>
+    <div id="recommendResult"></div>
+  </div>
 
-    <div class="card">
+  <!-- صفحه ماشین‌حساب -->
+  <div class="page" id="page-calculator">
+    <div class="detail-section">
+      <h3>محاسبه‌گر اقساط</h3>
       <div class="form-group">
         <label>مبلغ وام (تومان)</label>
-        <input type="number" id="amount" placeholder="مثلاً 500000000" value="500000000">
+        <input type="number" id="calcAmount" value="50000000">
       </div>
-
       <div class="form-group">
-        <label>مدت بازپرداخت (ماه)</label>
-        <input type="number" id="months" placeholder="مثلاً 36" value="36">
+        <label>مدت (ماه)</label>
+        <input type="number" id="calcMonths" value="12">
       </div>
-
       <div class="form-group">
-        <label>نرخ سود سالانه (درصد)</label>
-        <input type="number" id="rate" placeholder="مثلاً 23" value="23" step="0.1">
-        <div class="quick-rates">
-          <button class="rate-btn" onclick="setRate(18)">۱۸٪</button>
-          <button class="rate-btn active" onclick="setRate(23)">۲۳٪</button>
-          <button class="rate-btn" onclick="setRate(25)">۲۵٪</button>
-          <button class="rate-btn" onclick="setRate(28)">۲۸٪</button>
-        </div>
+        <label>نرخ سود سالانه (%)</label>
+        <input type="number" id="calcRate" value="23" step="0.1">
       </div>
-
-      <button class="calculate-btn" onclick="calculate()">محاسبه کن</button>
-    </div>
-
-    <div class="card result" id="result">
-      <div class="result-item">
-        <span class="result-label">قسط ماهانه</span>
-        <span class="result-value big" id="monthly">—</span>
+      <button class="btn btn-primary" onclick="runCalculator()">محاسبه کن</button>
+      <div class="calc-result" id="calcResult" style="display:none">
+        <div style="font-size:13px;color:#666">قسط ماهانه</div>
+        <div class="amount" id="calcMonthly">—</div>
       </div>
-      <div class="result-item">
-        <span class="result-label">کل مبلغ بازپرداخت</span>
-        <span class="result-value" id="total">—</span>
-      </div>
-      <div class="result-item">
-        <span class="result-label">کل سود پرداختی</span>
-        <span class="result-value" id="interest">—</span>
-      </div>
-    </div>
-
-    <div class="footer">
-      ساخته شده برای ایتا
     </div>
   </div>
 
+  <!-- نوار پایین -->
+  <div class="bottom-nav">
+    <button class="nav-item active" onclick="navigate('home')">
+      <span>🏠</span>خانه
+    </button>
+    <button class="nav-item" onclick="navigate('recommend')">
+      <span>✨</span>پیشنهاد
+    </button>
+    <button class="nav-item" onclick="navigate('calculator')">
+      <span>🧮</span>ماشین‌حساب
+    </button>
+  </div>
+
   <script>
-    // بررسی SDK ایتا
-    if (window.Eitaa && window.Eitaa.WebApp) {
-      console.log("SDK ایتا فعال است");
-      // می‌توانید اینجا از قابلیت‌های بیشتر استفاده کنید
-      // مثلاً: window.Eitaa.WebApp.expand();
-    } else {
-      console.log("در حال اجرا خارج از ایتا");
-    }
+    // ======================================================
+    //  ۱. بخش DATA  ←←←←  فقط اینجا اطلاعات جدید اضافه کن
+    // ======================================================
+    const DATA = {
+      categories: [
+        {
+          id: "platforms",
+          title: "پلتفرم‌های اعتباری",
+          icon: "🛒",
+          description: "خرید الان، پرداخت بعداً",
+          items: [
+            {
+              id: "snappay",
+              name: "اسنپ‌پی",
+              logo: "🟡",
+              short: "خرید اقساطی از فروشگاه‌های طرف قرارداد اسنپ",
+              rate: "بدون سود تا سقف مشخص / بعد از آن کارمزد",
+              maxAmount: "بسته به رتبه اعتباری",
+              duration: "۱ تا ۱۲ ماه",
+              tags: ["کالایی", "بدون ضامن", "آنلاین"],
+              conditions: [
+                "داشتن حساب کاربری اسنپ",
+                "احراز هویت و بررسی رتبه اعتباری",
+                "سقف اعتبار بر اساس رفتار مالی شما تعیین می‌شود"
+              ],
+              steps: [
+                "وارد اپ اسنپ شوید",
+                "بخش اسنپ‌پی را باز کنید",
+                "درخواست اعتبار دهید",
+                "پس از تأیید از فروشگاه‌های طرف قرارداد خرید کنید"
+              ],
+              officialLink: "https://snapp.ir"
+            },
+            {
+              id: "digipay",
+              name: "دیجی‌پی",
+              logo: "🔴",
+              short: "اعتبار خرید از دیجی‌کالا و فروشگاه‌های طرف قرارداد",
+              rate: "کارمزد متغیر (معمولاً ۱ تا ۲.۵٪ ماهانه)",
+              maxAmount: "تا چند ده میلیون تومان",
+              duration: "۱ تا ۱۲ ماه",
+              tags: ["کالایی", "دیجی‌کالا", "آنلاین"],
+              conditions: [
+                "حساب کاربری دیجی‌کالا",
+                "احراز هویت",
+                "بررسی اعتبارسنجی"
+              ],
+              steps: [
+                "وارد دیجی‌کالا شوید",
+                "بخش دیجی‌پی را انتخاب کنید",
+                "درخواست اعتبار ثبت کنید",
+                "پس از تأیید خرید اقساطی انجام دهید"
+              ],
+              officialLink: "https://www.digikala.com"
+            },
+            {
+              id: "torobpay",
+              name: "ترب‌پی",
+              logo: "🟢",
+              short: "خرید اقساطی از فروشگاه‌های مختلف از طریق ترب",
+              rate: "بسته به فروشگاه و طرح",
+              maxAmount: "متغیر",
+              duration: "چند ماهه",
+              tags: ["کالایی", "مقایسه‌قیمت"],
+              conditions: [
+                "داشتن حساب در ترب",
+                "احراز هویت"
+              ],
+              steps: [
+                "از طریق اپ یا سایت ترب وارد شوید",
+                "گزینه خرید اقساطی را انتخاب کنید",
+                "شرایط را بررسی و درخواست دهید"
+              ],
+              officialLink: "https://torob.com"
+            }
+            // ← اینجا پلتفرم جدید اضافه کن (فقط کپی و ویرایش کن)
+          ]
+        }
 
-    function setRate(value) {
-      document.getElementById('rate').value = value;
-      document.querySelectorAll('.rate-btn').forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
-    }
+        // ← اینجا دسته جدید اضافه کن (مثلاً وام‌های بانکی)
+        // {
+        //   id: "banks",
+        //   title: "وام‌های بانکی",
+        //   icon: "🏦",
+        //   description: "وام‌های رسمی بانک‌ها",
+        //   items: [ ... ]
+        // }
+      ]
+    };
 
-    function formatNumber(num) {
-      return new Intl.NumberFormat('fa-IR').format(Math.round(num)) + " تومان";
-    }
+    // ======================================================
+    //  ۲. بخش RENDER و Navigation
+    // ======================================================
+    let currentPage = "home";
+    let historyStack = [];
 
-    function calculate() {
-      const amount = parseFloat(document.getElementById('amount').value);
-      const months = parseInt(document.getElementById('months').value);
-      const annualRate = parseFloat(document.getElementById('rate').value);
+    function navigate(page, data = null) {
+      // مخفی کردن همه صفحات
+      document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+      document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
 
-      if (!amount || !months || !annualRate || amount <= 0 || months <= 0) {
-        alert("لطفاً همه مقادیر را به درستی وارد کنید");
-        return;
-      }
+      // نمایش صفحه مورد نظر
+      const pageEl = document.getElementById("page-" + page);
+      if (pageEl) pageEl.classList.add("active");
 
-      // فرمول قسط ماهانه (annuity)
-      const monthlyRate = annualRate / 100 / 12;
-      let monthlyPayment;
-
-      if (monthlyRate === 0) {
-        monthlyPayment = amount / months;
+      // مدیریت دکمه برگشت
+      const backBtn = document.getElementById("backBtn");
+      if (page === "home") {
+        backBtn.style.display = "none";
+        historyStack = [];
       } else {
-        monthlyPayment = amount * monthlyRate * Math.pow(1 + monthlyRate, months) / (Math.pow(1 + monthlyRate, months) - 1);
+        backBtn.style.display = "block";
+        if (currentPage !== page) historyStack.push(currentPage);
       }
 
-      const totalPayment = monthlyPayment * months;
-      const totalInterest = totalPayment - amount;
+      currentPage = page;
 
-      document.getElementById('monthly').textContent = formatNumber(monthlyPayment);
-      document.getElementById('total').textContent = formatNumber(totalPayment);
-      document.getElementById('interest').textContent = formatNumber(totalInterest);
+      // عنوان صفحه
+      const titles = {
+        home: "منبع وام و اعتبار",
+        category: data?.title || "دسته‌بندی",
+        detail: data?.name || "جزئیات",
+        recommend: "پیشنهاد هوشمند",
+        calculator: "ماشین‌حساب اقساط"
+      };
+      document.getElementById("pageTitle").textContent = titles[page] || "منبع وام";
 
-      document.getElementById('result').classList.add('show');
+      // هایلایت منوی پایین
+      if (page === "home") document.querySelectorAll(".nav-item")[0].classList.add("active");
+      if (page === "recommend") document.querySelectorAll(".nav-item")[1].classList.add("active");
+      if (page === "calculator") document.querySelectorAll(".nav-item")[2].classList.add("active");
+
+      // رندر محتوا
+      if (page === "home") renderHome();
+      if (page === "category") renderCategory(data);
+      if (page === "detail") renderDetail(data);
     }
 
-    // محاسبه خودکار در شروع
-    calculate();
+    function goBack() {
+      const prev = historyStack.pop() || "home";
+      navigate(prev);
+    }
+
+    // ---------- رندر صفحه اصلی ----------
+    function renderHome() {
+      const container = document.getElementById("homeContent");
+      let html = "";
+
+      DATA.categories.forEach(cat => {
+        html += `
+          <div class="card" onclick='navigate("category", ${JSON.stringify(cat)})'>
+            <div class="card-header">
+              <div class="logo">${cat.icon}</div>
+              <div>
+                <div class="card-title">${cat.title}</div>
+                <div class="card-subtitle">${cat.description}</div>
+              </div>
+            </div>
+            <div class="tags">
+              <span class="tag">${cat.items.length} مورد</span>
+            </div>
+          </div>
+        `;
+      });
+
+      // کارت میانبر پیشنهاد هوشمند
+      html += `
+        <div class="card" onclick="navigate('recommend')" style="background:linear-gradient(135deg,#0d6efd,#6610f2);color:white;">
+          <div class="card-header">
+            <div class="logo" style="background:rgba(255,255,255,0.2)">✨</div>
+            <div>
+              <div class="card-title" style="color:white">پیشنهاد هوشمند</div>
+              <div class="card-subtitle" style="color:rgba(255,255,255,0.8)">با چند سوال بهترین گزینه را پیدا کنید</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    // ---------- رندر لیست یک دسته ----------
+    function renderCategory(cat) {
+      const container = document.getElementById("categoryContent");
+      let html = "";
+
+      cat.items.forEach(item => {
+        html += `
+          <div class="card" onclick='navigate("detail", ${JSON.stringify(item)})'>
+            <div class="card-header">
+              <div class="logo">${item.logo}</div>
+              <div>
+                <div class="card-title">${item.name}</div>
+                <div class="card-subtitle">${item.short}</div>
+              </div>
+            </div>
+            <div class="tags">
+              ${item.tags.map(t => `<span class="tag">${t}</span>`).join("")}
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // ---------- رندر صفحه جزئیات ----------
+    function renderDetail(item) {
+      const container = document.getElementById("detailContent");
+      container.innerHTML = `
+        <div class="detail-section">
+          <div class="card-header" style="margin-bottom:16px">
+            <div class="logo" style="width:56px;height:56px;font-size:26px">${item.logo}</div>
+            <div>
+              <div class="card-title" style="font-size:18px">${item.name}</div>
+              <div class="card-subtitle">${item.short}</div>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+            <div style="background:#f8f9fa;padding:12px;border-radius:10px;text-align:center">
+              <div style="font-size:12px;color:#666">نرخ / کارمزد</div>
+              <div style="font-weight:600;font-size:14px">${item.rate}</div>
+            </div>
+            <div style="background:#f8f9fa;padding:12px;border-radius:10px;text-align:center">
+              <div style="font-size:12px;color:#666">سقف تقریبی</div>
+              <div style="font-weight:600;font-size:14px">${item.maxAmount}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h3>شرایط اصلی</h3>
+          <ul>
+            ${item.conditions.map(c => `<li>${c}</li>`).join("")}
+          </ul>
+        </div>
+
+        <div class="detail-section">
+          <h3>مراحل دریافت</h3>
+          <ul>
+            ${item.steps.map((s, i) => `<li><strong>${i+1}.</strong> ${s}</li>`).join("")}
+          </ul>
+        </div>
+
+        <a href="${item.officialLink}" target="_blank" class="btn btn-primary" style="text-decoration:none;margin-top:8px">
+          مراجعه به سایت رسمی
+        </a>
+      `;
+    }
+
+    // ---------- پیشنهاد هوشمند (نسخه ساده) ----------
+    function showRecommendations() {
+      const goal = document.getElementById("goal").value;
+      const result = document.getElementById("recommendResult");
+
+      // فعلاً ساده: همه پلتفرم‌های کالایی را نشان می‌دهد
+      let html = `<div style="margin-top:20px"><h3 style="margin-bottom:12px">پیشنهادهای مناسب شما:</h3>`;
+
+      DATA.categories[0].items.forEach(item => {
+        html += `
+          <div class="card" onclick='navigate("detail", ${JSON.stringify(item)})'>
+            <div class="card-header">
+              <div class="logo">${item.logo}</div>
+              <div>
+                <div class="card-title">${item.name}</div>
+                <div class="card-subtitle">${item.short}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      html += `</div>`;
+      result.innerHTML = html;
+    }
+
+    // ---------- ماشین‌حساب ----------
+    function runCalculator() {
+      const amount = parseFloat(document.getElementById("calcAmount").value);
+      const months = parseInt(document.getElementById("calcMonths").value);
+      const rate = parseFloat(document.getElementById("calcRate").value) / 100 / 12;
+
+      let monthly;
+      if (rate === 0) {
+        monthly = amount / months;
+      } else {
+        monthly = amount * rate * Math.pow(1 + rate, months) / (Math.pow(1 + rate, months) - 1);
+      }
+
+      document.getElementById("calcMonthly").textContent =
+        new Intl.NumberFormat("fa-IR").format(Math.round(monthly)) + " تومان";
+      document.getElementById("calcResult").style.display = "block";
+    }
+
+    // شروع برنامه
+    navigate("home");
+
+    // SDK ایتا
+    if (window.Eitaa?.WebApp) {
+      console.log("Eitaa SDK آماده است");
+    }
   </script>
 </body>
 </html>
